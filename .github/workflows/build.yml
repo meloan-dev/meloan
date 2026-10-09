@@ -1,0 +1,39 @@
+name: Production build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node: '22'
+            python: '3.11'
+          - node: '24'
+            python: '3.12'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: npm run build
+      - run: npm run check:syntax
+      - run: npm run check:integrity
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meloan-static-node-${{ matrix.node }}
+          path: dist/merged/
+          if-no-files-found: error
+          retention-days: 7
