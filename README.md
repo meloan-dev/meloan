@@ -1,4 +1,4 @@
-<p align="center"><a href="https://meloan.xyz"><img src="app/assets/wordmark.svg" width="240" alt="Meloan" /></a></p>
+<p align="center"><a href="https://meloan.xyz"><img src="docs/assets/meloan-banner.jpg" width="1280" alt="Meloan Soft Buddy overlooking a galactic world of floating castles" /></a></p>
 <h1 align="center">Meloan</h1>
 <p align="center"><strong>Keep the meme. Unlock the liquidity.</strong></p>
 <p align="center">A meme-backed lending interface for Robinhood Chain, with USDG as the proposed loan asset.</p>
