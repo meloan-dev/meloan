@@ -1,0 +1,20 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+const html=fs.readFileSync(__dirname+'/../src/story.template.html','utf8');
+const script=html.match(/<script>\s*\/\* Loader:[\s\S]*?<\/script>/)[0].replace(/^<script>|<\/script>$/g,'');
+for(const reduced of [false,true]) test(`loader waits for start, enables sound once (reduced motion: ${reduced})`,()=>{
+ const nodes={}; const node=id=>nodes[id]??=( {style:{},hidden:true,textContent:'',clientWidth:800,clientHeight:600,handlers:{},attrs:{},classList:{add(){},remove(){}},setAttribute(k,v){this.attrs[k]=v},addEventListener(k,v){this.handlers[k]=v},focus(){},getContext(){return null}});
+ let frame,now=0,launches=0,stored='off',resumes=0;
+ const window={AudioContext:class{state='suspended';resume(){resumes++;this.state='running';return Promise.resolve()}}};
+ const context={window,document:{documentElement:node('root'),getElementById:node,hidden:false,dispatchEvent(){}},history:{},scrollTo(){},matchMedia:()=>({matches:reduced}),localStorage:{setItem(k,v){stored=v}},devicePixelRatio:1,addEventListener(){},performance:{now:()=>0},requestAnimationFrame:f=>frame=f,setTimeout(){},CustomEvent:class{},console};
+ vm.runInNewContext(script,context);
+ node('loader').handlers.click();assert.equal(window.__loader.launched,false);
+ window.__loader.onLaunch(({sound})=>{launches++;assert.equal(sound,true)});
+ window.__loader.complete();
+ for(let i=0;i<150;i++)frame(now+=100);
+ assert.equal(node('ld-pct').textContent,'100%');assert.equal(window.__loader.launched,false);assert.equal(node('ld-start').hidden,false);assert.equal(resumes,0);
+ node('loader').handlers.click();assert.equal(window.__loader.launched,true);assert.equal(stored,'on');assert.equal(resumes,1);assert.equal(launches,1);
+ node('loader').handlers.click();assert.equal(launches,1);
+});

@@ -1,0 +1,16 @@
+<title>Meloan App</title>
+<meta name="description" content="Meloan: borrow USDG against Robinhood Chain memecoins without selling them, or lend to the one market you choose.">
+<meta name="theme-color" content="#0D1130">
+<link rel="icon" type="image/png" sizes="400x400" href="assets/favicon.png?v=9223ac9c01c9">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=Chakra+Petch:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+<script>try { if (JSON.parse(localStorage.getItem('meloan-app-prefs-v1') || '{}').motion !== false && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('motion'); } catch (e) { document.documentElement.classList.add('motion'); }</script>
+<template id="wordmark-tpl">{{WORDMARK}}</template>
+<button type="button" class="sr skip" onclick="document.getElementById('main').focus()">Skip to content</button>
+<div id="app"><p id="boot">Loading the Meloan console…</p></div>
+<div id="live" class="sr" aria-live="polite"></div>
+<div id="toasts"></div>
+<noscript><p style="padding:24px;color:#FFF4DF">Meloan needs JavaScript to run. Please enable scripts and reload.</p></noscript>
+<script type="module" src="src/main.js"></script>

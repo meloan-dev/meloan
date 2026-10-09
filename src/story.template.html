@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Meloan Story</title>
+<link rel="icon" type="image/png" sizes="400x400" href="app/assets/favicon.png?v=9223ac9c01c9">
+<meta name="description" content="Keep the meme. Unlock the liquidity. Follow Buddy through Meloan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: the 3D stage fills the screen; story text runs as small subtitles at the bottom,
+   the chapter name sits small at the top, example cards tuck into the top-left corner.
+   Single dark, futuristic look: night navy with cobalt neon and coral accents. */
+:root {
+  --night: #0D1130;
+  --navy: #232845;
+  --cobalt: #4256C8;
+  --neon: #7D8BFF;
+  --coral: #EE916E;
+  --lavender: #EEEBF7;
+  --cream: #FFF4DF;
+  --ink: #FFF4DF;
+  --ink-soft: #B9BBD8;
+  --glass: rgba(16, 20, 52, 0.66);
+  --glass-line: rgba(125, 139, 255, 0.28);
+  --display: "Chakra Petch", Arial, sans-serif;
+  --body: "Manrope", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--night); color: var(--ink); font: 16px/1.5 var(--body); }
+#scene { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; display: block; z-index: 0; }
+.spacer { height: calc((17.05 + 1) * 100vh); position: relative; z-index: 1; pointer-events: none; }
+.shade { position: fixed; left: 0; right: 0; bottom: 0; height: 26vh; z-index: 3; pointer-events: none;
+  background: linear-gradient(to top, rgba(9, 11, 34, 0.78), rgba(9, 11, 34, 0)); }
+
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 6;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: calc(env(safe-area-inset-top, 0px) + 18px) clamp(16px, 4vw, 44px) 0;
+  pointer-events: none;
+}
+header > * { pointer-events: auto; }
+.logo { display: inline-flex; align-items: center; gap: 8px; }
+.logo .brand-icon { width: 36px; height: 36px; object-fit: contain; flex: none; transform: translateY(-2px); }
+.logo svg { height: 26px; width: auto; display: block; }
+.logo g { fill: var(--cream); }
+.btn {
+  font: 600 14px/1 var(--body); text-decoration: none; color: var(--night); background: var(--cream);
+  padding: 12px 17px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px;
+  transition: transform .15s, background .2s, box-shadow .2s;
+}
+.btn:hover { transform: translateY(-1px); background: #fff; box-shadow: 0 0 22px rgba(125, 139, 255, .55); }
+.btn:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+.btn.ghost { background: transparent; color: var(--cream); box-shadow: inset 0 0 0 1.5px rgba(255, 244, 223, .7); }
+.btn.ghost:hover { background: rgba(255, 244, 223, .1); }
+.head-actions { display: flex; gap: 10px; align-items: center; }
+.sound { border: 0; cursor: pointer; padding: 11px 14px; font: 600 13px/1 var(--body); }
+.sound .wave { display: none; } .sound[aria-pressed="true"] .wave { display: inline; } .sound[aria-pressed="true"] .mute { display: none; }
+.sound[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--coral), 0 0 16px rgba(238, 145, 110, .35); }
+@media (max-width: 520px) { .sound span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .sound { padding: 11px 12px; } }
+
+/* chapter label, top centre */
+.chapter { position: fixed; z-index: 5; top: calc(env(safe-area-inset-top, 0px) + 30px); left: 50%; transform: translateX(-50%); width: 60vw; height: 1em; pointer-events: none; text-align: center; }
+.chapter > * { position: absolute; left: 0; right: 0; top: 0; margin: 0; opacity: 0; visibility: hidden; }
+.eyebrow { font: 600 11.5px/1 var(--display); letter-spacing: .2em; text-transform: uppercase; color: var(--neon); }
+.eyebrow b { color: var(--coral); font-weight: 600; }
+
+/* subtitles, bottom centre */
+.copy { position: fixed; z-index: 4; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 34px); width: min(720px, calc(100vw - 32px)); pointer-events: none; }
+.copy > * { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; opacity: 0; visibility: hidden; text-align: center; will-change: opacity, transform; }
+.line { font: 500 clamp(16px, 1.45vw, 20px)/1.4 var(--display); letter-spacing: 0; color: var(--ink); text-wrap: balance; text-shadow: 0 1px 12px rgba(5, 7, 26, .9); }
+
+/* opening + finale: compact, bottom centre */
+.big { position: fixed; z-index: 4; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 30px); width: min(680px, calc(100vw - 32px)); pointer-events: none; text-align: center; }
+.big > * { position: absolute; left: 0; right: 0; bottom: 0; opacity: 0; visibility: hidden; }
+.hero-title { margin: 0; font: 700 clamp(24px, 2.6vw, 36px)/1.1 var(--display); letter-spacing: -0.01em; color: var(--ink); text-wrap: balance; text-shadow: 0 1px 16px rgba(5, 7, 26, .9); }
+.hero-title em { font-style: normal; color: var(--neon); }
+.hero-sub { font: 500 clamp(14px, 1.1vw, 15.5px)/1.5 var(--body); color: var(--ink-soft); margin: 10px auto 0; max-width: 36em; }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px; pointer-events: auto; }
+.finale .note { margin: 12px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+.finale .eyebrow { margin: 0 0 10px; }
+
+/* example cards: compact, top-left */
+.cards { position: fixed; z-index: 4; left: clamp(16px, 3vw, 40px); top: calc(env(safe-area-inset-top, 0px) + 84px); width: min(300px, calc(100vw - 32px)); pointer-events: none; }
+.card {
+  position: absolute; left: 0; top: 0; width: 100%; opacity: 0; visibility: hidden;
+  background: var(--glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px; padding: 15px 17px; box-shadow: inset 0 0 0 1px var(--glass-line), 0 0 30px -10px rgba(91, 114, 255, .45);
+}
+.card .tag { font: 600 10.5px/1 var(--display); letter-spacing: .16em; text-transform: uppercase; color: var(--coral); }
+.card h3 { margin: 7px 0 10px; font: 600 15px/1.3 var(--display); color: var(--ink); }
+.rows { display: grid; gap: 7px; margin: 0; }
+.rows div { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; border-top: 1px solid var(--glass-line); padding-top: 7px; }
+.rows dt { color: var(--ink-soft); font-size: 12.5px; }
+.rows dd { margin: 0; font: 600 15px/1 var(--display); font-variant-numeric: tabular-nums; color: var(--ink); }
+.rows .total dd { color: var(--neon); font-size: 18px; }
+.fine { margin: 9px 0 0; font-size: 11.5px; color: var(--ink-soft); }
+.formula { font: 600 14px/1.5 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; margin: 0; }
+.formula b { color: var(--neon); font-weight: 700; }
+.meter { height: 8px; border-radius: 99px; background: rgba(255, 244, 223, .12); overflow: hidden; margin: 10px 0 5px; position: relative; }
+.meter i { position: absolute; inset: 0 auto 0 0; background: #4CD18F; border-radius: inherit; box-shadow: 0 0 12px #4CD18F; transition: background .3s; }
+.meter::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; background: var(--cream); }
+#card-fuel .meter::after { display: none; }
+#card-fuel.low .hv b { color: #FF7A5C; animation: blink 0.9s steps(2) infinite; }
+#card-fuel.low .meter i { background: #FF5A3A; box-shadow: 0 0 12px #FF5A3A; }
+@keyframes blink { 50% { opacity: .35; } }
+#card-health.low .meter i { background: #FF5A3A; box-shadow: 0 0 12px #FF5A3A; }
+.hv { display: flex; justify-content: space-between; align-items: baseline; }
+.hv b { font: 700 26px/1 var(--display); font-variant-numeric: tabular-nums; color: var(--ink); }
+#card-health.low .hv b { color: #FF7A5C; }
+.hv span { font-size: 11.5px; color: var(--ink-soft); }
+.scale { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.bars { display: grid; gap: 7px; margin-top: 2px; }
+.bar { display: grid; grid-template-columns: 82px 1fr auto; gap: 8px; align-items: center; font-size: 12px; color: var(--ink-soft); }
+.bar span:nth-child(2) { height: 8px; border-radius: 99px; background: currentColor; }
+.bar b { font: 600 13.5px/1 var(--display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.bar.debt span:nth-child(2) { color: #FF7A5C; width: 100%; }
+.bar.res span:nth-child(2) { color: var(--neon); width: 62.5%; }
+.bar.loss span:nth-child(2) { color: var(--coral); width: 37.5%; opacity: .7; }
+
+/* world labels */
+.wtag {
+  position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; opacity: 0; visibility: hidden;
+  font: 600 11px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+  background: rgba(13, 17, 48, .8); color: var(--cream); padding: 7px 10px; border-radius: 7px;
+  box-shadow: inset 0 0 0 1px var(--neon), 0 0 16px rgba(125, 139, 255, .5);
+}
+.wtag.warn { box-shadow: inset 0 0 0 1px #FF6A45, 0 0 16px rgba(255, 106, 69, .5); color: #FFC3B2; }
+
+/* rail */
+.rail { position: fixed; right: clamp(10px, 2vw, 28px); top: 50%; transform: translateY(-50%); z-index: 5; display: flex; flex-direction: column; gap: 10px; }
+.rail button { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: rgba(255, 244, 223, .28); position: relative; transition: background .25s, transform .25s, box-shadow .25s; }
+.rail button[aria-current="step"] { background: var(--coral); transform: scale(1.4); box-shadow: 0 0 10px var(--coral); }
+.rail button span { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); white-space: nowrap; font: 600 11px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--cream); background: var(--glass); padding: 6px 9px; border-radius: 7px; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.rail button:hover span, .rail button:focus-visible span { opacity: 1; }
+.rail button:focus-visible { outline: 2px solid var(--neon); outline-offset: 3px; }
+
+#cue { position: fixed; right: clamp(16px, 4vw, 44px); bottom: calc(env(safe-area-inset-bottom, 0px) + 30px); z-index: 4; display: flex; align-items: center; gap: 8px; font: 600 10.5px/1 var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); pointer-events: none; }
+#cue i { width: 18px; height: 28px; border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--ink-soft); position: relative; }
+#cue i::after { content: ""; position: absolute; left: 50%; top: 6px; width: 3px; height: 6px; border-radius: 2px; background: var(--coral); transform: translateX(-50%); animation: cue 1.6s infinite; }
+@keyframes cue { 0% { transform: translate(-50%, 0); opacity: 1; } 80% { transform: translate(-50%, 8px); opacity: 0; } 100% { opacity: 0; } }
+
+#veil { position: fixed; inset: 0; z-index: 2; background: var(--night); opacity: 0; pointer-events: none; }
+body.alert .eyebrow { color: #FF8A66; }
+
+footer { position: relative; z-index: 6; background: #080A1F; color: var(--cream); padding-block: 52px 36px; padding-inline: clamp(16px, 6vw, 88px); box-shadow: 0 -1px 0 var(--glass-line); }
+.foot { max-width: 1100px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 24px 48px; justify-content: space-between; align-items: flex-end; }
+.foot p { margin: 10px 0 0; color: var(--ink-soft); font-size: 14px; max-width: 46ch; }
+.legal { max-width: 1100px; margin: 32px auto 0; padding-top: 16px; border-top: 1px solid var(--glass-line); font-size: 12px; color: #8C8FB3; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+/* ---- opening loader: orbiting a black hole, falling in, coming out of a white hole ---- */
+html.locked, html.locked body { overflow: hidden; }
+#loader { position: fixed; inset: 0; z-index: 20; color: var(--ink); background: #020310; display: grid; grid-template-rows: auto 1fr auto; padding: calc(env(safe-area-inset-top, 0px) + 18px) clamp(16px, 4vw, 44px) calc(env(safe-area-inset-bottom, 0px) + 22px); overflow: hidden; }
+#loader.gone { display: none; }
+#ld-bh { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+#loader::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, rgba(2, 3, 16, .7), rgba(2, 3, 16, 0) 24%, rgba(2, 3, 16, 0) 58%, rgba(2, 3, 16, .88)); transition: opacity .5s; }
+#loader.plunge::before { opacity: 0; }
+#loader > :not(canvas) { position: relative; z-index: 2; transition: opacity .5s; }
+#loader.plunge > :not(canvas) { opacity: 0; }
+.ld-k { display: block; font: 600 10px/1 var(--display); letter-spacing: .24em; text-transform: uppercase; color: var(--ink-soft); }
+.ld-v { font: 600 15px/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.ld-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.ld-top .logo svg { height: 26px; width: auto; display: block; }
+.ld-top .logo g { fill: var(--cream); }
+.ld-clock { text-align: right; display: grid; gap: 7px; }
+.ld-clock .ld-v { font-size: 17px; }
+.ld-clock .ld-v b { color: var(--coral); font-weight: 600; }
+.ld-head { align-self: start; text-align: center; padding-top: clamp(4px, 2.5vh, 30px); pointer-events: none; }
+.ld-head p { margin: 0 auto; max-width: 34em; font: 500 clamp(13px, 1.5vw, 15px)/1.45 var(--body); color: var(--ink-soft); text-shadow: 0 1px 12px rgba(0, 0, 0, .8); }
+.ld-bottom { display: grid; grid-template-columns: 1fr minmax(260px, 420px) 1fr; align-items: end; gap: 18px; text-shadow: 0 1px 14px rgba(0, 0, 0, .8); }
+.ld-dist .ld-big { font: 700 clamp(34px, 5vw, 54px)/1 var(--display); font-variant-numeric: tabular-nums; letter-spacing: -.02em; margin-top: 8px; display: flex; align-items: baseline; gap: 8px; }
+.ld-dist .ld-big small { font: 600 12px/1 var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--coral); }
+.ld-times { justify-self: end; display: grid; gap: 10px; text-align: right; }
+.ld-times .row { display: grid; gap: 6px; }
+.ld-times .dil { display: inline-block; margin-left: 8px; padding: 3px 6px; border-radius: 6px; font: 600 10.5px/1 var(--display); color: var(--night); background: var(--coral); vertical-align: 2px; text-shadow: none; }
+.ld-center { display: grid; gap: 12px; justify-items: center; text-align: center; }
+.ld-status { margin: 0; font: 600 13.5px/1.3 var(--body); color: var(--cream); min-height: 1.3em; }
+.ld-bar { width: 100%; height: 2px; background: rgba(125, 139, 255, .22); border-radius: 2px; position: relative; }
+.ld-bar b { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 2px; background: linear-gradient(90deg, #7D8BFF, #EE916E); box-shadow: 0 0 10px rgba(238, 145, 110, .8); }
+.ld-bar span { position: absolute; right: 0; top: 8px; font: 600 10.5px/1 var(--display); letter-spacing: .1em; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+#loader > #ld-start { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: max-content; max-width: calc(100% - 40px); margin: 0; text-align: center; color: #FFF6EC; font: 500 clamp(18px, 2.2vw, 26px)/1.4 var(--display); letter-spacing: .035em; pointer-events: none; text-shadow: 0 2px 8px #020310, 0 0 24px #020310, 0 0 40px rgba(2, 3, 16, .9); }
+#ld-start[hidden] { display: none; }
+#loader.ready { cursor: pointer; }
+#ld-white { position: fixed; inset: 0; z-index: 22; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 50%, #FFFFFF 0%, #FFF6EC 30%, #FFE3CF 55%, #C9CEFF 100%); }
+#ld-white.gone { display: none; }
+@media (max-width: 760px) {
+  .ld-bottom { grid-template-columns: 1fr 1fr; }
+  .ld-center { grid-column: 1 / -1; grid-row: 2; }
+  .ld-dist .ld-big { font-size: 30px; }
+  .ld-clock .ld-v { font-size: 14px; }
+}
+@media (max-height: 600px) { .ld-head p { display: none; } }
+
+@media (max-width: 760px) {
+  .chapter { top: calc(env(safe-area-inset-top, 0px) + 70px); width: calc(100vw - 32px); }
+  .copy { bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); }
+  .line { font-size: 15.5px; }
+  .big { bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); }
+  .cards { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); left: 12px; right: 12px; width: auto; }
+  .card { top: auto; bottom: 0; }
+  .rail { right: 6px; gap: 8px; }
+  .rail button { width: 7px; height: 7px; }
+  #cue { display: none; }
+  header .btn { padding: 10px 13px; font-size: 13px; }
+  .shade { height: 34vh; }
+}
+@media (prefers-reduced-motion: reduce) { #cue i::after { animation: none; } .btn { transition: none; } }
+</style>
+</head>
+<body>
+
+<div class="shade"></div>
+<canvas id="scene" aria-label="Buddy's story in 3D, driven by scrolling"></canvas>
+<div id="loader" role="dialog" aria-modal="true" aria-label="Loading Buddy's journey to Meloan" aria-describedby="ld-status" tabindex="-1">
+  <canvas id="ld-bh" aria-hidden="true"></canvas>
+  <p id="ld-start" hidden>Tap anywhere to begin</p>
+  <div class="ld-top">
+    <span class="logo" aria-hidden="true">{{WORDMARK}}</span>
+    <div class="ld-clock">
+      <span class="ld-k">Mission clock</span>
+      <span class="ld-v" id="ld-clock">T+<b>00:00</b>.00</span>
+    </div>
+  </div>
+  <div class="ld-head">
+    <p>Meloan is 4.2 light-years away. Buddy found a shortcut: straight through the dark.</p>
+  </div>
+  <div class="ld-bottom">
+    <div class="ld-dist">
+      <span class="ld-k">Distance to the horizon</span>
+      <div class="ld-big"><span id="ld-km">480</span><small>km</small></div>
+    </div>
+    <div class="ld-center">
+      <p class="ld-status" id="ld-status" aria-live="polite">Locking into orbit…</p>
+      <div class="ld-bar" aria-hidden="true"><b id="ld-bar"></b><span id="ld-pct">0%</span></div>
+    </div>
+    <div class="ld-times">
+      <div class="row"><span class="ld-k">Earth time</span><span class="ld-v" id="ld-earth">00:00.00</span></div>
+      <div class="row"><span class="ld-k">Buddy's time</span><span class="ld-v"><span id="ld-buddy">00:00.00</span><span class="dil" id="ld-dil">−0.0%</span></span></div>
+    </div>
+  </div>
+</div>
+<div id="ld-white" aria-hidden="true"></div>
+<script>
+/* Loader: the camera orbits a black hole (real-time gravitational lensing in a WebGL shader) while the
+   3D story loads. At 100% it waits for a start gesture, then is pulled across the event horizon and thrown out of a white hole into Buddy's world.
+   Real milestones come from the story module through window.__loader. */
+(() => {
+  const root = document.documentElement;
+  root.classList.add('locked');
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  scrollTo(0, 0);
+  const $ = (id) => document.getElementById(id);
+  const el = $('loader'), cv = $('ld-bh'), white = $('ld-white');
+  const ui = { clock: $('ld-clock'), km: $('ld-km'), bar: $('ld-bar'), pct: $('ld-pct'), status: $('ld-status'), earth: $('ld-earth'), buddy: $('ld-buddy'), dil: $('ld-dil') };
+  const startBtn = $('ld-start');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const LINES = [[0, 'Locking into orbit…'], [20, 'Reading the accretion disk…'], [45, 'Buddy’s clock is slowing down…'], [70, 'Lining up with the portal…'], [92, 'Holding steady at the edge…'], [100, 'Here we go…']];
+  const RS_KM = 30;                         // one Schwarzschild radius, for a ~10 solar-mass black hole
+
+  // The start gesture explicitly enables sound and resumes audio inside the gesture.
+  let sound = true;
+  const begin = () => {
+    if (!ready || phase !== 'orbit' || document.hidden) return;
+    ready = false;
+    sound = true;
+    try { localStorage.setItem('meloan-sound', 'on'); } catch (e) { /* storage unavailable */ }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try {
+      if (AC) {
+        if (!window.__audioCtx || window.__audioCtx.state === 'closed') window.__audioCtx = new AC();
+        if (window.__audioCtx.state !== 'running') Promise.resolve(window.__audioCtx.resume()).catch(() => {});
+      }
+    } catch (e) { /* the story sound control can retry */ }
+    startPlunge();
+  };
+  el.addEventListener('click', begin);
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); begin(); }
+  });
+
+  // ---------- WebGL black hole ----------
+  const gl = cv.getContext('webgl', { antialias: false, alpha: false, preserveDrawingBuffer: false, powerPreference: 'high-performance' });
+  const VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }';
+  const FS = `precision highp float;
+uniform vec2 uRes; uniform float uTime; uniform vec3 uCam, uFwd, uRight, uUp;
+uniform float uLens, uDisk, uPull, uWhite;
+float h31(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float n3(vec3 p){ vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h31(i), h31(i + vec3(1,0,0)), f.x), mix(h31(i + vec3(0,1,0)), h31(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h31(i + vec3(0,0,1)), h31(i + vec3(1,0,1)), f.x), mix(h31(i + vec3(0,1,1)), h31(i + vec3(1,1,1)), f.x), f.y), f.z); }
+float fbm(vec3 p){ float s = 0.0, a = 0.5; for (int i = 0; i < 4; i++) { s += a * n3(p); p = p * 2.03 + 1.7; a *= 0.5; } return s; }
+vec3 sky(vec3 d){
+  vec3 col = vec3(0.0);
+  for (int k = 0; k < 2; k++) {
+    float sc = k == 0 ? 70.0 : 170.0;
+    vec3 p = d * sc, c = floor(p), f = fract(p) - 0.5;
+    float h = h31(c + float(k) * 11.0);
+    vec3 off = vec3(h31(c + 1.3), h31(c + 2.7), h31(c + 4.1)) - 0.5;
+    float s = smoothstep(0.11, 0.0, length(f - off * 0.6)) * step(k == 0 ? 0.93 : 0.955, h);
+    col += s * mix(vec3(0.75, 0.8, 1.0), vec3(1.0, 0.78, 0.62), h31(c + 9.0)) * (k == 0 ? 1.6 : 0.9);
+  }
+  float n = fbm(d * 2.2 + 3.0);
+  col += vec3(0.16, 0.2, 0.62) * pow(n, 3.0) * 0.55 + vec3(0.55, 0.2, 0.32) * pow(fbm(d * 3.1 + 9.0), 4.0) * 0.5;
+  return col;
+}
+vec4 disk(vec3 p, vec3 rd){
+  float r = length(p.xz);
+  if (r < 2.4 || r > 14.0) return vec4(0.0);
+  float a = atan(p.z, p.x) + uTime * 2.2 * pow(r, -1.5) * 3.0;
+  vec3 q = vec3(cos(a) * r, sin(a) * r, r * 0.35);
+  float n = fbm(q * 0.75) * 0.7 + fbm(q * 2.4) * 0.45;
+  float t = 1.0 - smoothstep(2.4, 13.0, r);
+  vec3 cool = vec3(0.42, 0.45, 1.0), warm = vec3(1.0, 0.55, 0.38), hot = vec3(1.0, 0.93, 0.84);
+  vec3 c = mix(cool, warm, smoothstep(0.05, 0.55, t)); c = mix(c, hot, smoothstep(0.62, 0.98, t));
+  float dop = clamp(1.0 + 0.7 * dot(normalize(vec3(-p.z, 0.0, p.x)), -rd), 0.25, 1.9);
+  float dens = smoothstep(2.4, 3.0, r) * (1.0 - smoothstep(9.0, 14.0, r)) * (0.25 + n);
+  float I = dens * (0.16 + 1.5 * t * t) * pow(dop, 2.2) * uDisk;
+  return vec4(c * I, clamp(dens * 0.85, 0.0, 1.0));
+}
+void main(){
+  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
+  vec3 rd = normalize(uFwd * uLens + uRight * uv.x + uUp * uv.y);
+  vec3 pos = uCam, vel = rd;
+  vec3 hv = cross(pos, vel); float h2 = dot(hv, hv);
+  vec3 col = vec3(0.0); float alpha = 0.0, minR = 100.0; bool captured = false;
+  for (int i = 0; i < 170; i++) {
+    float r = length(pos);
+    minR = min(minR, r);
+    if (r < 1.0) { captured = true; break; }
+    if (r > 45.0 && dot(pos, vel) > 0.0) break;
+    float dt = clamp(0.07 * r * r / (r + 3.0), 0.025, 1.4);
+    vec3 npos = pos + vel * dt;
+    vel += -1.5 * h2 * pos / pow(r, 5.0) * dt;
+    if (pos.y * npos.y < 0.0) {
+      vec3 hp = mix(pos, npos, pos.y / (pos.y - npos.y));
+      vec4 d = disk(hp, normalize(vel));
+      col += (1.0 - alpha) * d.rgb; alpha += (1.0 - alpha) * d.a;
+      if (alpha > 0.97) break;
+    }
+    pos = npos;
+  }
+  if (!captured) col += (1.0 - alpha) * sky(normalize(vel));
+  // thin photon ring hugging the shadow
+  if (!captured) col += vec3(1.0, 0.78, 0.62) * 0.55 * exp(-max(0.0, minR - 1.52) * 9.0) * uDisk;
+  // the plunge: spaghettified light streaming past toward the centre
+  if (uPull > 0.0) {
+    float ang = atan(uv.y, uv.x), rr = length(uv);
+    float lane = floor(ang * 70.0 / 6.2831);
+    float s = pow(h31(vec3(lane, 1.0, 2.0)), 14.0);
+    float flow = fract(rr * 2.5 + uTime * (3.0 + 6.0 * uPull) + h31(vec3(lane, 3.0, 1.0)));
+    float streak = s * smoothstep(0.0, 0.25, flow) * smoothstep(1.0, 0.4, flow) * smoothstep(0.05, 0.5, rr);
+    col += vec3(1.0, 0.72, 0.55) * streak * uPull * 2.5;
+    col *= 1.0 - 0.7 * smoothstep(0.75, 1.0, uPull);
+  }
+  // the white hole: everything pours out of a blinding point
+  if (uWhite > 0.0) {
+    float rr = length(uv);
+    float core = smoothstep(0.02 + 1.6 * uWhite * uWhite, 0.0, rr);
+    float ang = atan(uv.y, uv.x);
+    float rays = pow(h31(vec3(floor(ang * 90.0 / 6.2831), 5.0, 7.0)), 10.0) * smoothstep(0.0, 0.9, uWhite) * exp(-rr * 1.2);
+    col = mix(col, vec3(1.0, 0.97, 0.94), clamp(core + rays * 2.0 + uWhite * uWhite * 0.6, 0.0, 1.0));
+  }
+  col = 1.0 - exp(-col * 1.05);
+  gl_FragColor = vec4(pow(col, vec3(0.92)), 1.0);
+}`;
+  let prog = null, U = {};
+  if (gl) {
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : (console.warn(gl.getShaderInfoLog(s)), null); };
+    const vs = sh(gl.VERTEX_SHADER, VS), fs = sh(gl.FRAGMENT_SHADER, FS);
+    if (vs && fs) {
+      prog = gl.createProgram(); gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) prog = null;
+    }
+    if (prog) {
+      gl.useProgram(prog);
+      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      for (const n of ['uRes', 'uTime', 'uCam', 'uFwd', 'uRight', 'uUp', 'uLens', 'uDisk', 'uPull', 'uWhite']) U[n] = gl.getUniformLocation(prog, n);
+    }
+  }
+  if (!prog) el.style.background = 'radial-gradient(circle at 50% 50%, #000 0 9vmin, #FFB08F 9.6vmin, #4A3070 14vmin, #020310 40vmin)';
+  // render at a pixel budget: the lensing is heavy, and the glow hides the softness
+  let scale = 1;
+  const size = () => {
+    const w = cv.clientWidth, h = cv.clientHeight;
+    scale = Math.min(Math.min(1.5, devicePixelRatio || 1), Math.sqrt(650000 / Math.max(1, w * h)));
+    cv.width = Math.max(2, Math.round(w * scale)); cv.height = Math.max(2, Math.round(h * scale));
+    if (gl) gl.viewport(0, 0, cv.width, cv.height);
+  };
+  size(); addEventListener('resize', size);
+
+  // ---------- state ----------
+  let target = 0.05, shown = 0, real = 0, complete = false, ready = false, phase = 'orbit', onLaunch = null;
+  let t = 0, last = performance.now(), earthT = 0, buddyT = 0, theta = 0.6, R = 30, pull = 0, whiteK = 0, phaseT = 0;
+  const pad = (n) => String(Math.floor(n)).padStart(2, '0');
+  const fmt = (s) => `${pad(s / 60)}:${pad(s % 60)}.${pad((s % 1) * 100)}`;
+  const easeIn = (x) => x * x * x;
+
+  function render() {
+    if (!prog) return;
+    const elev = 0.17 + 0.05 * Math.sin(t * 0.21) - 0.12 * pull;
+    const cam = [Math.cos(theta) * Math.cos(elev) * R, Math.sin(elev) * R, Math.sin(theta) * Math.cos(elev) * R];
+    // look at the hole, slightly above it so the disk sits lower in the frame
+    const tgt = [0, 0.55 * (1 - pull), 0];
+    let fx = tgt[0] - cam[0], fy = tgt[1] - cam[1], fz = tgt[2] - cam[2];
+    let l = Math.hypot(fx, fy, fz); fx /= l; fy /= l; fz /= l;
+    const roll = 0.12 * Math.sin(t * 0.17) + pull * pull * 1.8;
+    let rx = -fz, rz = fx; l = Math.hypot(rx, rz) || 1; rx /= l; rz /= l;
+    let ux = -rz * fy, uy = rz * fx - rx * fz, uz = rx * fy;
+    const cr = Math.cos(roll), sr = Math.sin(roll);
+    const Rr = [rx * cr + ux * sr, uy * sr, rz * cr + uz * sr], Uu = [-rx * sr + ux * cr, uy * cr, -rz * sr + uz * cr];
+    gl.uniform2f(U.uRes, cv.width, cv.height);
+    gl.uniform1f(U.uTime, t);
+    gl.uniform3f(U.uCam, cam[0], cam[1], cam[2]);
+    gl.uniform3f(U.uFwd, fx, fy, fz); gl.uniform3f(U.uRight, Rr[0], Rr[1], Rr[2]); gl.uniform3f(U.uUp, Uu[0], Uu[1], Uu[2]);
+    gl.uniform1f(U.uLens, 1.9 - 1.0 * pull);           // the field of view stretches open as he falls
+    gl.uniform1f(U.uDisk, 0.45 + 0.35 * shown);
+    gl.uniform1f(U.uPull, pull); gl.uniform1f(U.uWhite, whiteK);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  function tick(now) {
+    if (phase === 'done') return;
+    const dt = Math.min(0.1, (now - last) / 1000); last = now; t += dt; phaseT += dt;
+    if (phase === 'orbit') {
+      // creep toward 80% while the network works, then follow the real milestones; at least ~3.5s overall
+      if (!complete) target = Math.max(target, real, target + (0.8 - target) * dt * 0.4); else target = 1;
+      const goal = Math.min(target, complete ? 1 : 0.97, t / 3.5 + 0.03);
+      shown += Math.max(0, goal - shown) * Math.min(1, dt * 4.5);
+      if (complete && t >= 3.5 && 1 - shown < 0.004) shown = 1;
+      R = 30 - 10 * shown;                              // a slow inspiral while loading
+      theta += dt * (reduce ? 0.03 : 0.22) * Math.pow(20 / R, 1.5);
+      if (shown >= 1 && !ready) {
+        ready = true;
+        el.classList.add('ready');
+        startBtn.hidden = false;
+        el.setAttribute('aria-label', 'Story ready. Tap anywhere to begin');
+        el.focus({ preventScroll: true });
+      }
+    } else if (phase === 'plunge') {
+      // pulled in: the orbit tightens, spins up and the horizon swallows the view
+      const k = Math.min(1, phaseT / 2.0);
+      pull = easeIn(Math.min(1, k * 1.05));
+      R = 20 + (0.6 - 20) * easeIn(k);
+      theta += dt * (0.25 + 5 * k * k);
+      if (k >= 1) { phase = 'dark'; phaseT = 0; }
+    } else if (phase === 'dark') {
+      pull = 1;
+      if (phaseT > 0.3) { phase = 'white'; phaseT = 0; }
+    } else if (phase === 'white') {
+      // a white hole: the light pours back out, then Buddy's world appears through it
+      whiteK = Math.min(1, phaseT / 0.55);
+      pull = Math.max(0, 1 - phaseT * 3);
+      if (whiteK >= 1 && !emerged) emerge();
+    }
+    render();
+    // readouts: Buddy's clock follows the time dilation of his orbit, and stops at the horizon
+    const factor = phase === 'orbit' ? Math.sqrt(1 - 1.5 / R) : Math.sqrt(Math.max(0, 1 - 1 / Math.max(1, R)));
+    const speed = phase === 'plunge' ? 1 + 40 * pull : 1;
+    earthT += dt * speed; buddyT += dt * factor * (phase === 'plunge' ? 1 - pull : 1);
+    const p = shown * 100;
+    ui.clock.innerHTML = `T+<b>${pad(earthT / 60)}:${pad(earthT % 60)}</b>.${pad((earthT % 1) * 100)}`;
+    ui.km.textContent = Math.max(0, Math.round((R - 1) * RS_KM)).toString();
+    ui.bar.style.width = `${p}%`; ui.pct.textContent = `${Math.floor(p)}%`;
+    ui.earth.textContent = fmt(earthT); ui.buddy.textContent = fmt(buddyT);
+    ui.dil.textContent = `−${((1 - factor) * 100).toFixed(1)}%`;
+    let line = LINES[0][1];
+    for (const [at, s] of LINES) if (p >= at) line = s;
+    if (ready) line = 'Your journey is ready';
+    if (ui.status.textContent !== line) ui.status.textContent = line;
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  function startPlunge() {
+    phase = 'plunge'; phaseT = 0;
+    el.classList.add('plunge');
+    if (onLaunch) onLaunch({ sound });
+    if (reduce) { phase = 'white'; phaseT = 0.5; }
+  }
+  let emerged = false;
+  function emerge() {
+    emerged = true;
+    // the white of the white hole covers the switch-over, then fades to reveal the story
+    white.style.opacity = '1';
+    el.classList.add('gone');
+    phase = 'done';
+    const ext = gl && gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext();
+    root.classList.remove('locked');
+    scrollTo(0, 0);
+    document.dispatchEvent(new CustomEvent('meloan:launched'));
+    requestAnimationFrame(() => {
+      white.style.transition = `opacity ${reduce ? 0.4 : 1.6}s cubic-bezier(.3, 0, .2, 1)`;
+      white.style.opacity = '0';
+      setTimeout(() => white.classList.add('gone'), 1700);
+    });
+  }
+  setTimeout(() => { if (!complete) { real = 1; complete = true; } }, 25000);   // never strand anyone behind the loader
+  window.__loader = {
+    stage(p) { real = Math.max(real, p); },
+    complete() { real = 1; complete = true; },
+    onLaunch(cb) { onLaunch = cb; if (phase !== 'orbit') cb({ sound, late: true }); },
+    onTick: null,
+    get launched() { return phase !== 'orbit'; },
+  };
+})();
+</script>
+<div id="veil"></div>
+
+<header>
+  <a class="logo" href="#top" aria-label="Meloan home"><img class="brand-icon" src="app/assets/buddy-face.webp" alt="" width="36" height="36" aria-hidden="true">{{WORDMARK}}</a>
+  <div class="head-actions">
+    <button class="btn ghost sound" id="sound" type="button" aria-pressed="false" title="Turn sound effects on or off">
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="mute" d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Sound off</span>
+    </button>
+    <a class="btn" href="https://claude.ai/artifact/FdwXmWqUwUP7ax4e84hukt" target="_blank" rel="noopener" id="launch-top">Launch app</a>
+  </div>
+</header>
+
+<nav class="rail" aria-label="Chapters">
+  <button aria-current="step"><span>Meloan</span></button>
+  <button><span>The problem</span></button>
+  <button><span>Touchdown</span></button>
+  <button><span>The dilemma</span></button>
+  <button><span>One meme, one market</span></button>
+  <button><span>Unlock</span></button>
+  <button><span>The other side</span></button>
+  <button><span>The storm</span></button>
+  <button><span>The shield</span></button>
+  <button><span>Nothing hidden</span></button>
+  <button><span>Lift-off</span></button>
+</nav>
+
+<div class="big">
+  <div class="hero" data-in="-1" data-out="0.75" data-fade="0.25">
+    <h1 class="hero-title">Keep the meme.<br><em>Unlock the liquidity.</em></h1>
+    <p class="hero-sub">Follow Buddy across the galaxy to Meloan, where you can borrow stablecoins against your memecoins without selling them.</p>
+  </div>
+
+  <div class="finale" data-in="16.55" data-out="18.5" data-fade="0.18">
+    <p class="eyebrow"><b>10 ·</b> Lift-off</p>
+    <h2 class="hero-title">Keep the meme.<br><em>Unlock the liquidity.</em></h2>
+    <div class="cta">
+      <a class="btn" href="https://claude.ai/artifact/FdwXmWqUwUP7ax4e84hukt" target="_blank" rel="noopener">Launch app</a>
+      <a class="btn ghost" href="https://claude.ai/artifact/FdwXmWqUwUP7ax4e84hukt#/docs" target="_blank" rel="noopener">Read the whitepaper</a>
+    </div>
+    <p class="note">Built for Robinhood Chain.</p>
+  </div>
+</div>
+
+<div class="chapter" aria-hidden="true">
+<p class="eyebrow" data-in="1.25" data-out="2.55"><b>01 ·</b> The problem</p>
+<p class="eyebrow" data-in="2.65" data-out="3.75"><b>02 ·</b> Touchdown</p>
+<p class="eyebrow" data-in="4.2" data-out="5.55"><b>03 ·</b> The dilemma</p>
+<p class="eyebrow" data-in="5.7" data-out="7.05"><b>04 ·</b> One meme, one market</p>
+<p class="eyebrow" data-in="7.2" data-out="9.05"><b>05 ·</b> Unlock</p>
+<p class="eyebrow" data-in="9.2" data-out="10.55"><b>06 ·</b> The other side</p>
+<p class="eyebrow" data-in="10.7" data-out="12.55"><b>07 ·</b> The storm</p>
+<p class="eyebrow" data-in="12.7" data-out="14.05"><b>08 ·</b> The shield</p>
+<p class="eyebrow" data-in="14.2" data-out="15"><b>09 ·</b> Nothing hidden</p>
+</div>
+
+<div class="copy" aria-live="polite">
+  <p class="line" data-in="1.28" data-out="1.7">Somewhere past the edge of the chart, Buddy's fuel is running low.</p>
+  <p class="line" data-in="1.74" data-out="2.12">His bag is all meme. His rocket runs on dollars.</p>
+  <p class="line" data-in="2.16" data-out="2.55">Then a signal: a place where you can borrow without selling.</p>
+  <p class="line" data-in="2.66" data-out="2.9">Destination: Meloan.</p>
+  <p class="line" data-in="3.2" data-out="3.76">Buddy lands. A keeper drone flies out to meet him.</p>
+  <p class="line" data-in="4.25" data-out="4.9">Selling closes your position.</p>
+  <p class="line" data-in="5.02" data-out="5.55">There's another way.</p>
+  <p class="line" data-in="5.72" data-out="6.2">Every memecoin gets its own market.</p>
+  <p class="line small" data-in="6.22" data-out="6.65">Its own limits. Its own rate. Its own reserve.</p>
+  <p class="line" data-in="6.68" data-out="7.05">Not every token gets in.</p>
+  <p class="line" data-in="7.22" data-out="7.65">Lock your meme as collateral.</p>
+  <p class="line" data-in="7.85" data-out="8.28">Borrow stablecoins against it.</p>
+  <p class="line" data-in="8.68" data-out="9.05">Your meme is still yours.</p>
+  <p class="line" data-in="9.22" data-out="9.68">Lenders supply the stablecoins.</p>
+  <p class="line small" data-in="9.7" data-out="10.55">They pick the market. They earn from real borrowing.</p>
+  <p class="line" data-in="10.72" data-out="11.15">Memes move fast.</p>
+  <p class="line small" data-in="11.2" data-out="11.8">Add collateral or repay to stay healthy.</p>
+  <p class="line small" data-in="11.88" data-out="12.26">If health falls below 1, part of the position can be liquidated.</p>
+  <p class="line" data-in="12.28" data-out="12.58">Only what's needed. The rest stays yours.</p>
+  <p class="line small" data-in="12.7" data-out="13.2">Every market builds its own reserve from protocol revenue.</p>
+  <p class="line small" data-in="13.6" data-out="14.05">Losses stay in their market. A reserve is a buffer, not insurance.</p>
+  <p class="line small" data-in="14.2" data-out="14.6">Every parameter, every reserve, every admin action: published.</p>
+  <p class="line small" data-in="14.62" data-out="15">Multisig. Timelocks. No admin function to sweep your funds.</p>
+  <p class="line" data-in="15.36" data-out="15.92">Back at the rocket, the stablecoins become fuel.</p>
+  <p class="line" data-in="15.95" data-out="16.4">His meme stays locked as collateral, and stays his. Repay anytime to unlock it.</p>
+
+
+</div>
+
+<div class="cards">
+  <div class="card" id="card-fuel" data-in="1.4,15.3" data-out="2.6,16.25" data-fade="0.1">
+    <span class="tag">Rocket fuel · runs on stablecoins</span>
+    <div class="hv"><b id="fuel-val">34%</b><span>refuel below 20%</span></div>
+    <div class="meter fuel"><i id="fuel-bar" style="width:34%"></i></div>
+  </div>
+  <div class="card" data-in="8.28" data-out="8.7" data-fade="0.1">
+    <span class="tag">Quick math</span>
+    <h3>Borrowing against $1,000 of meme</h3>
+    <dl class="rows">
+      <div><dt>Collateral value</dt><dd>$1,000</dd></div>
+      <div><dt>Opening loan-to-value</dt><dd>25%</dd></div>
+      <div class="total"><dt>Borrow up to</dt><dd>$250</dd></div>
+    </dl>
+    <p class="fine">Each market sets its own limits.</p>
+  </div>
+  <div class="card" data-in="10.05" data-out="10.58" data-fade="0.1">
+    <span class="tag">Quick math</span>
+    <h3>What lenders earn</h3>
+    <p class="formula">20% borrow rate × 50% utilization × 85% to lenders = <b>8.5% APR</b></p>
+    <p class="fine">Not a promise. Returns depend on real borrowing, rates and losses.</p>
+  </div>
+  <div class="card" id="card-health" data-in="10.85" data-out="12.55" data-fade="0.12">
+    <span class="tag">Position health</span>
+    <div class="hv"><b id="health-val">1.80</b><span>liquidation below 1.00</span></div>
+    <div class="meter"><i id="health-bar" style="width:90%"></i></div>
+    <div class="scale"><span>0</span><span>1.00</span><span>2.00</span></div>
+  </div>
+  <div class="card" data-in="13.15" data-out="13.62" data-fade="0.1">
+    <span class="tag">Quick math</span>
+    <h3>When a loan can't be fully covered</h3>
+    <div class="bars">
+      <div class="bar debt"><span>Bad debt</span><span></span><b>$8,000</b></div>
+      <div class="bar res"><span>Reserve pays</span><span></span><b>$5,000</b></div>
+      <div class="bar loss"><span>Lenders lose</span><span></span><b>$3,000</b></div>
+    </div>
+    <p class="fine">Only lenders in this market share the remainder.</p>
+  </div>
+</div>
+
+<span class="wtag warn" id="tag-locked">Not listed</span>
+<span class="wtag" id="tag-rate">Borrow rate</span>
+<span class="wtag" id="tag-reserve">Reserve balance</span>
+<span class="wtag" id="tag-liq">Available liquidity</span>
+<span class="wtag" id="tag-debt">Recognised bad debt</span>
+<span class="wtag" id="tag-admin">Admin transactions</span>
+<span class="wtag" id="tag-fees">Fees collected</span>
+
+<div id="cue" aria-hidden="true"><i></i>Scroll</div>
+
+<div class="spacer" id="top"></div>
+
+
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
+/*STORY_JS*/
+</script>
+</body>
+</html>

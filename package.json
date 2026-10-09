@@ -1,0 +1,13 @@
+{
+  "name": "meloan",
+  "private": true,
+  "description": "Meme-backed lending interface for Robinhood Chain",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "node preview.cjs",
+    "build": "python3 scripts/build.py",
+    "test": "node --test app/test/*.test.js test/*.test.cjs",
+    "check:syntax": "python3 scripts/check-syntax.py",
+    "check:integrity": "python3 scripts/check-integrity.py"
+  }
+}

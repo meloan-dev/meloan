@@ -1,0 +1,392 @@
+<title>Meloan 3D Cast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a toy-photography stage on the left, a slim control rail on the right; stacks on phones.
+   Deliberately single-theme: this page lives inside Meloan's lavender world. */
+:root {
+  --navy: #232845;
+  --cobalt: #4256C8;
+  --coral: #EE916E;
+  --lavender: #EEEBF7;
+  --cream: #FFF4DF;
+  --ink-soft: #5A5F80;
+  --line: #D9D4EC;
+  --panel: #F8F6FC;
+  --display: "Chakra Petch", "Arial", sans-serif;
+  --body: "Manrope", "Arial", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--lavender);
+  color: var(--navy);
+  font: 15px/1.5 var(--body);
+  padding-inline: 16px;
+  padding-block: 0 16px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; min-height: 100%; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 16px 2px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand svg { height: 26px; width: auto; display: block; }
+.brand .sep { width: 1px; height: 22px; background: var(--line); }
+.brand .crumb { font: 600 13px/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.status { font: 500 13px/1.3 var(--body); color: var(--ink-soft); }
+.status b { color: var(--navy); font-weight: 700; }
+
+main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; flex: 1; min-height: 0; }
+.stage {
+  position: sticky; top: 16px; align-self: start; border-radius: 22px; overflow: hidden;
+  height: clamp(480px, calc(100vh - 110px), 820px);
+  background:
+    radial-gradient(120% 80% at 50% 105%, #FFF4DF 0%, rgba(255,244,223,0) 55%),
+    radial-gradient(90% 70% at 50% 30%, #FFFFFF 0%, #F3F0FA 60%, #E6E1F4 100%);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+.stage canvas:active { cursor: grabbing; }
+.hint { position: absolute; left: 16px; bottom: 14px; font: 500 12px/1 var(--body); color: var(--ink-soft); background: rgba(255,255,255,0.7); padding: 7px 10px; border-radius: 999px; pointer-events: none; }
+.viewtag { position: absolute; right: 16px; top: 14px; font: 600 11px/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+
+aside { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel { background: var(--panel); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: inset 0 0 0 1px var(--line); }
+.panel h2 { margin: 0; font: 600 12px/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+.btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+button {
+  font: 600 14px/1 var(--body); color: var(--navy); background: #fff; border: 0;
+  box-shadow: inset 0 0 0 1px var(--line), 0 1px 0 var(--line);
+  border-radius: 12px; padding: 11px 8px; cursor: pointer; transition: transform .12s, box-shadow .12s, background .12s;
+}
+button:hover { box-shadow: inset 0 0 0 1px var(--cobalt), 0 1px 0 var(--line); }
+button:active { transform: translateY(1px); }
+button:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+button[aria-pressed="true"] { background: var(--navy); color: var(--cream); box-shadow: none; }
+.refs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ref { padding: 0; background: #fff; overflow: hidden; display: flex; flex-direction: column; border-radius: 12px; }
+.ref img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.ref span { font: 600 11px/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 0 8px; color: var(--ink-soft); }
+.ref[aria-pressed="true"] span { color: var(--cream); }
+.objs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.refone { display: flex; gap: 12px; align-items: center; }
+.refone img { width: 96px; height: 96px; object-fit: cover; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px var(--line); }
+.refone span { font-size: 13px; color: var(--ink-soft); }
+.note { font-size: 13px; color: var(--ink-soft); margin: 0; }
+.specs { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 13px; margin: 0; }
+.specs dt { color: var(--ink-soft); }
+.specs dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 860px) {
+  main { grid-template-columns: minmax(0, 1fr); }
+  .stage { position: relative; top: auto; height: auto; aspect-ratio: 4 / 5; max-height: 70vh; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button { transition: none; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      {{WORDMARK}}
+      <span class="sep" aria-hidden="true"></span>
+      <span class="crumb">3D cast · build v3</span>
+    </div>
+    <div class="status"><b>For approval.</b> Compare each object with your reference images.</div>
+  </header>
+
+  <main>
+    <div class="stage" id="stage">
+      <span class="viewtag" id="viewtag">Turntable</span>
+      <span class="hint">Drag to turn · scroll or pinch to zoom</span>
+    </div>
+
+    <aside>
+      <section class="panel" aria-labelledby="h-obj">
+        <h2 id="h-obj">Object</h2>
+        <div class="btns objs">
+          <button id="o-buddy" data-obj="buddy" aria-pressed="true">Buddy</button>
+          <button id="o-drone" data-obj="drone" aria-pressed="false">Keeper drone</button>
+          <button id="o-counter" data-obj="counter" aria-pressed="false">Sell counter</button>
+          <button id="o-coins" data-obj="coins" aria-pressed="false">Meme coins</button>
+          <button id="o-rocket" data-obj="rocket" aria-pressed="false">Rocket</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-refs" id="panel-refs">
+        <h2 id="h-refs">Match a reference view</h2>
+        <div class="refs" id="refs-buddy">
+          <button class="ref" id="ref-front" data-view="front" aria-pressed="false"><img alt="Reference sheet, front view" src="data:image/jpeg;base64,{{THUMB_FRONT}}"><span>Front</span></button>
+          <button class="ref" id="ref-side" data-view="side" aria-pressed="false"><img alt="Reference sheet, left side view" src="data:image/jpeg;base64,{{THUMB_SIDE}}"><span>Side</span></button>
+          <button class="ref" id="ref-back" data-view="back" aria-pressed="false"><img alt="Reference sheet, back view" src="data:image/jpeg;base64,{{THUMB_BACK}}"><span>Back</span></button>
+        </div>
+        <div class="refone" id="refs-drone" hidden><img alt="Reference image of the keeper drone" src="data:image/jpeg;base64,{{THUMB_DRONE}}"><span>Your reference: three-quarter front</span></div>
+        <div class="refs" id="refs-counter" hidden>
+          <button class="ref" data-cview="front" aria-pressed="false"><img alt="Sell counter reference, front view" src="data:image/jpeg;base64,{{THUMB_CFRONT}}"><span>Front</span></button>
+          <button class="ref" data-cview="34" aria-pressed="false"><img alt="Sell counter reference, three-quarter view" src="data:image/jpeg;base64,{{THUMB_C34}}"><span>3/4</span></button>
+          <button class="ref" data-cview="side" aria-pressed="false"><img alt="Sell counter reference, side view" src="data:image/jpeg;base64,{{THUMB_CSIDE}}"><span>Side</span></button>
+        </div>
+        <button id="turntable" aria-pressed="true">Turntable</button>
+      </section>
+
+      <section class="panel" aria-labelledby="h-moves" id="panel-moves">
+        <h2 id="h-moves">Moves from the story</h2>
+        <div class="btns">
+          <button id="m-wave" data-move="wave">Wave</button>
+          <button id="m-nod" data-move="nod">Nod</button>
+          <button id="m-hop" data-move="hop">Hop</button>
+          <button id="m-shake" data-move="shake">Head shake</button>
+          <button id="m-walk" data-walk aria-pressed="false">Walk</button>
+          <button id="m-look" data-look aria-pressed="false">Look around</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="h-mood" id="panel-eye">
+        <h2 id="h-mood">Eye</h2>
+        <div class="btns">
+          <button id="e-neutral" data-mood="neutral" aria-pressed="true">Calm</button>
+          <button id="e-happy" data-mood="happy" aria-pressed="false">Happy</button>
+          <button id="e-worried" data-mood="worried" aria-pressed="false">Worried</button>
+        </div>
+        <p class="note">Blinks every few seconds on his own. Happy is chapter 1 and 9; worried is the storm in chapter 6.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="h-specs">
+        <h2 id="h-specs">Build</h2>
+        <dl class="specs">
+          <dt>Showing</dt><dd id="objname">Buddy</dd>
+          <dt>Made with</dt><dd>Three.js, built in code</dd>
+          <dt>Triangles</dt><dd id="tris">–</dd>
+          <dt>Model files</dt><dd>None, all built in code</dd>
+          <dt>Credits used</dt><dd>0</dd>
+        </dl>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+/*BUDDY_JS*/
+
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const stage = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+stage.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.85;
+
+const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 100);
+camera.position.set(0, 1.4, 10.2);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.08, 0);
+controls.enableDamping = true;
+controls.enablePan = false;
+controls.minDistance = 5.5;
+controls.maxDistance = 16;
+controls.minPolarAngle = 0.35;
+controls.maxPolarAngle = Math.PI / 2 + 0.05;
+controls.autoRotateSpeed = 1.6;
+
+scene.add(new THREE.HemisphereLight('#ffffff', '#e4def5', 0.9));
+const key = new THREE.DirectionalLight('#fff8ef', 1.25);
+key.position.set(-2.5, 7, 6);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -4; key.shadow.camera.right = 4; key.shadow.camera.top = 4; key.shadow.camera.bottom = -4;
+key.shadow.radius = 14; key.shadow.blurSamples = 20; key.shadow.bias = -0.0004;
+scene.add(key);
+const rim = new THREE.DirectionalLight('#dfe4ff', 0.7);
+rim.position.set(4, 3, -5);
+scene.add(rim);
+
+const ground = new THREE.Mesh(new THREE.CircleGeometry(4, 64), new THREE.ShadowMaterial({ opacity: 0.1 }));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+let blob;
+{
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grd.addColorStop(0, 'rgba(35,40,69,0.32)'); grd.addColorStop(0.55, 'rgba(35,40,69,0.12)'); grd.addColorStop(1, 'rgba(35,40,69,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+  blob = new THREE.Mesh(new THREE.PlaneGeometry(2.1, 1.3), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+  blob.rotation.x = -Math.PI / 2; blob.position.set(0, 0.002, 0.18);
+  scene.add(blob);
+}
+
+const buddy = createBuddy({ scale: 0.2 });
+scene.add(buddy.root);
+const drone = createDrone({ scale: 0.62 });
+drone.root.position.y = 1.15;
+scene.add(drone.root);
+const counter = createSellCounter({ scale: 0.2 });
+counter.root.position.z = -0.1;
+scene.add(counter.root);
+const rocketP = createRocket({ scale: 0.62 });
+rocketP.root.position.y = rocketP.root.userData.groundY;
+rocketP.root.userData.setLegs(1);
+scene.add(rocketP.root);
+const coins = new THREE.Group();
+const COIN_FACES = [/*COIN_FACES*/];
+COIN_FACES.forEach((url, i) => {
+  const c = createMemeCoin(url, { scale: 0.42 });
+  c.root.position.set((i - 1.5) * 1.02, 1.05 + (i % 2) * 0.12, 0);
+  c.root.userData.phase = i * 0.7;
+  coins.add(c.root);
+});
+scene.add(coins);
+
+const OBJECTS = {
+  buddy: { obj: buddy.root, name: 'Buddy', target: 1.08 },
+  drone: { obj: drone.root, name: 'Keeper drone', target: 1.15 },
+  counter: { obj: counter.root, name: 'Sell counter', target: 1.1 },
+  coins: { obj: coins, name: 'Meme coins', target: 1.08 },
+  rocket: { obj: rocketP.root, name: 'Rocket', target: 1.2 },
+};
+function countTris(root) {
+  let n = 0;
+  root.traverse((o) => { if (o.isMesh) { const g = o.geometry; n += (g.index ? g.index.count : g.attributes.position.count) / 3; } });
+  return Math.round(n);
+}
+let current = 'buddy';
+function showObject(key) {
+  current = key;
+  if (wideLens) { wideLens = false; resize(); }
+  for (const [k, v] of Object.entries(OBJECTS)) v.obj.visible = k === key;
+  blob.visible = key === 'buddy';
+  document.querySelectorAll('[data-obj]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.obj === key)));
+  document.getElementById('panel-moves').hidden = key !== 'buddy';
+  document.getElementById('panel-eye').hidden = key !== 'buddy';
+  document.getElementById('refs-buddy').hidden = key !== 'buddy';
+  document.getElementById('refs-drone').hidden = key !== 'drone';
+  document.getElementById('refs-counter').hidden = key !== 'counter';
+  document.getElementById('panel-refs').hidden = key === 'coins' || key === 'rocket';
+  document.getElementById('objname').textContent = OBJECTS[key].name;
+  document.getElementById('tris').textContent = countTris(OBJECTS[key].obj).toLocaleString('en-US');
+  controls.target.set(0, OBJECTS[key].target, 0);
+  if (key === 'drone') {
+    setTurntable(false);
+    const r = 10.2, a = -0.55;
+    camera.position.set(Math.sin(a) * r, 2.2, Math.cos(a) * r);
+  }
+  if (key === 'counter') document.querySelector('[data-cview="34"]').click();
+  if (key === 'coins') { setTurntable(false); camera.position.set(0, 1.3, 10.2); }
+  if (key === 'rocket') { setTurntable(true); camera.position.set(5.5, 3.2, 9.5); }
+}
+document.querySelectorAll('[data-obj]').forEach((b) => b.addEventListener('click', () => showObject(b.dataset.obj)));
+const CVIEWS = { front: [0, 2.35, 6.0], '34': [2.3, 2.45, 5.6], side: [6.0, 2.2, 0.1] };
+document.querySelectorAll('[data-cview]').forEach((b) => b.addEventListener('click', () => {
+  setTurntable(false);
+  document.querySelectorAll('[data-cview]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  const [x, y, z] = CVIEWS[b.dataset.cview];
+  wideLens = true; resize();
+  camera.position.set(x, y, z);
+  viewtag.textContent = b.querySelector('span').textContent + ' view';
+}));
+
+// ----- controls -----
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ttBtn = document.getElementById('turntable');
+const viewtag = document.getElementById('viewtag');
+const refBtns = [...document.querySelectorAll('.ref[data-view]')];
+let turntable = !reduce;
+function setTurntable(on) {
+  turntable = on;
+  controls.autoRotate = on;
+  ttBtn.setAttribute('aria-pressed', String(on));
+  if (on) { refBtns.forEach((b) => b.setAttribute('aria-pressed', 'false')); viewtag.textContent = 'Turntable'; }
+  else if (viewtag.textContent === 'Turntable') viewtag.textContent = 'Free view';
+}
+setTurntable(turntable);
+ttBtn.addEventListener('click', () => setTurntable(!turntable));
+
+const VIEWS = { front: 0, side: -Math.PI / 2 + 0.3, back: Math.PI };
+let snap = null;
+refBtns.forEach((b) => b.addEventListener('click', () => {
+  setTurntable(false);
+  refBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  viewtag.textContent = b.querySelector('span').textContent + ' view';
+  const p = camera.position;
+  const a0 = Math.atan2(p.x, p.z);
+  let a1 = VIEWS[b.dataset.view];
+  while (a1 - a0 > Math.PI) a1 -= Math.PI * 2;
+  while (a1 - a0 < -Math.PI) a1 += Math.PI * 2;
+  snap = { a0, a1, y0: p.y, r0: Math.hypot(p.x, p.z), t: 0 };
+}));
+controls.addEventListener('start', () => { snap = null; });
+
+document.querySelectorAll('[data-move]').forEach((b) => b.addEventListener('click', () => buddy.play(b.dataset.move)));
+const walkBtn = document.getElementById('m-walk');
+let walking = false;
+walkBtn.addEventListener('click', () => { walking = !walking; walkBtn.setAttribute('aria-pressed', String(walking)); });
+const lookBtn = document.getElementById('m-look');
+let looking = false;
+lookBtn.addEventListener('click', () => { looking = !looking; lookBtn.setAttribute('aria-pressed', String(looking)); if (!looking) buddy.setLook(0, 0); });
+const moodBtns = [...document.querySelectorAll('[data-mood]')];
+moodBtns.forEach((b) => b.addEventListener('click', () => {
+  buddy.setMood(b.dataset.mood);
+  moodBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  if (b.dataset.mood === 'happy') buddy.play('hop');
+  if (b.dataset.mood === 'worried') buddy.play('shake');
+}));
+
+let wideLens = false;
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.fov = (w / h < 0.9 ? 28 : 22) + (wideLens ? 14 : 0);
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+
+const clock = new THREE.Clock();
+let walkBlend = 0;
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  walkBlend += ((walking ? 1 : 0) - walkBlend) * Math.min(1, dt * 6);
+  buddy.setWalk(walkBlend);
+  if (looking) {
+    const t = clock.elapsedTime;
+    buddy.setLook(Math.sin(t * 0.9), Math.sin(t * 1.3) * 0.6);
+    buddy.parts.neck.rotation.y = Math.sin(t * 0.9) * 0.25;
+  }
+  buddy.update(reduce ? 0 : dt);
+  drone.update(reduce ? 0 : dt);
+  rocketP.root.userData.setFlame(current === 'rocket' ? 0.7 : 0, clock.elapsedTime);
+  coins.children.forEach((c) => { c.rotation.y = Math.sin(clock.elapsedTime * 0.8 + c.userData.phase) * 0.6; });
+  if (looking) buddy.parts.neck.rotation.y = Math.sin(clock.elapsedTime * 0.9) * 0.25;
+  if (snap) {
+    snap.t = Math.min(1, snap.t + dt / 0.7);
+    const e = 1 - Math.pow(1 - snap.t, 3);
+    const a = snap.a0 + (snap.a1 - snap.a0) * e;
+    const r = snap.r0 + (10.2 - snap.r0) * e;
+    camera.position.set(Math.sin(a) * r, snap.y0 + (1.4 - snap.y0) * e, Math.cos(a) * r);
+    if (snap.t >= 1) snap = null;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+});
+showObject('buddy');
+window.__buddy = { buddy, camera, controls, setTurntable, renderer, showObject, counter, scene };
+</script>
